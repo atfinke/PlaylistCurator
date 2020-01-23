@@ -307,6 +307,7 @@ class SpotifyManager: NSObject, ObservableObject {
             let task = URLSession.shared.dataTask(with: request) { data, response, error in
                 guard let data = data, let json = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String: Any],
                     let item = json["item"] as? [String: Any],
+                    let isPlaying = json["is_playing"] as? Bool,
                     let trackName = item["name"] as? String,
                     let trackURI = item["uri"] as? String,
                     let context = json["context"] as? [String: Any],
@@ -321,6 +322,16 @@ class SpotifyManager: NSObject, ObservableObject {
                         completion(nil, nil, nil, nil)
                         return
                 }
+                
+                #if os(macOS)
+                DispatchQueue.main.async {
+                    if isPlaying {
+                        NSApplication.shared.activate(ignoringOtherApps: true)
+                    } else {
+                        NSApplication.shared.hide(nil)
+                    }
+                }
+                #endif
 
                 if trackURI == self.nowPlayingTrackURI {
                     completion(trackName,
@@ -334,6 +345,9 @@ class SpotifyManager: NSObject, ObservableObject {
                         self.updateNowPlaying()
                     }
                     Timer.scheduledTimer(withTimeInterval: duration + 10, repeats: false) { _ in
+                        self.updateNowPlaying()
+                    }
+                    Timer.scheduledTimer(withTimeInterval: 30, repeats: false) { _ in
                         self.updateNowPlaying()
                     }
                 }
