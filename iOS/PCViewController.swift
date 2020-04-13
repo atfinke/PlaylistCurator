@@ -9,7 +9,13 @@
 import SwiftUI
 
 class PCViewController: UIHostingController<ContentView> {
-    override var prefersHomeIndicatorAutoHidden: Bool {
-        return true
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        view.backgroundColor = .black
+    }
+    
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .lightContent
     }
 }

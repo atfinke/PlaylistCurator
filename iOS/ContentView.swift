@@ -11,55 +11,58 @@ import Combine
 
 struct AlbumView : View {
     var image: Image
-
+    
     var body: some View {
         image
             .resizable()
-            .frame(width: 340, height: 340)
-            .cornerRadius(32)
-            .padding(.top, 60)
+            .frame(width: 200, height: 200)
     }
 }
 
 struct ContentView: View {
-
+    
     @ObservedObject var manager = SpotifyManager()
-
+    
     var body: some View {
         return VStack {
-            manager.nowPlayingTrackImage.map {
-                AlbumView(image: $0).contextMenu {
-                    Button(action: {
-                        self.manager.reloadNowPlaying()
-                    }, label: {
-                        HStack {
-                            Text("Reload")
-                            Image(systemName: "gobackward")
-                        }
-                    })
+            HStack {
+                manager.nowPlayingTrackImage.map {
+                    AlbumView(image: $0).contextMenu {
+                        Button(action: {
+                            self.manager.reloadNowPlaying()
+                        }, label: {
+                            HStack {
+                                Text("Reload")
+                                Image(systemName: "gobackward")
+                            }
+                        })
+                    }
                 }
-            }
+            }.padding()
+            
+            Text(manager.nowPlayingPlaylistName)
+                .font(.system(size: 26, weight: .bold, design: .rounded))
+                .foregroundColor(.white)
             Text(manager.nowPlayingTrackName)
-
+                .multilineTextAlignment(.center)
+                .font(.system(size: 22, weight: .semibold, design: .rounded))
+                .foregroundColor(.white)
+                .padding()
+            
             Spacer()
-
+            
             Button(action: {
                 self.manager.keepTrack()
             }, label: {
                 ButtonContentView(imageName:"checkmark", color: .green)
             }).padding(.bottom, 10)
-
+            
             Button(action: {
                 self.manager.removeTrack()
             }, label: {
                 ButtonContentView(imageName:"trash.circle.fill", color: .red)
             }).padding(.bottom, 20)
             
-        }.frame(minWidth: 0,
-                maxWidth: .infinity,
-                minHeight: 0,
-                maxHeight: .infinity)
-            .background(Color.black)
-            .edgesIgnoringSafeArea(.all)
+        }.background(Color.black)
     }
 }

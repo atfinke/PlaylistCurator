@@ -93,7 +93,7 @@ class SpotifyManager: NSObject, ObservableObject {
     private var isPreventingDoubleClick = false {
         didSet {
             if isPreventingDoubleClick {
-                Timer.scheduledTimer(withTimeInterval: 2, repeats: false) { _ in
+                Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { _ in
                     self.isPreventingDoubleClick = false
                 }
             }
