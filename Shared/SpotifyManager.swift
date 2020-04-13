@@ -90,6 +90,16 @@ class SpotifyManager: NSObject, ObservableObject {
         }
     }
     
+    private var isPreventingDoubleClick = false {
+        didSet {
+            if isPreventingDoubleClick {
+                Timer.scheduledTimer(withTimeInterval: 2, repeats: false) { _ in
+                    self.isPreventingDoubleClick = false
+                }
+            }
+        }
+    }
+    
     // MARK: - State Properties -
 
     public var objectWillChange = ObservableObjectPublisher()
@@ -224,6 +234,9 @@ class SpotifyManager: NSObject, ObservableObject {
     // MARK: - User Actions -
     
     func keepTrack() {
+        guard !isPreventingDoubleClick else { return }
+        isPreventingDoubleClick = true
+        
         postSkipTrack(completion: { success in
             DispatchQueue.main.async {
                 self.userActionCompleted(successfully: success)
@@ -232,6 +245,9 @@ class SpotifyManager: NSObject, ObservableObject {
     }
     
     func removeTrack() {
+        guard !isPreventingDoubleClick else { return }
+        isPreventingDoubleClick = true
+        
         deleteTrackFromPlaylist(completion: { success in
             DispatchQueue.main.async {
                 if success {
