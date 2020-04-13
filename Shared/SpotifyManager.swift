@@ -325,9 +325,7 @@ class SpotifyManager: NSObject, ObservableObject {
                 
                 #if os(macOS)
                 DispatchQueue.main.async {
-                    if isPlaying {
-                        NSApplication.shared.activate(ignoringOtherApps: true)
-                    } else {
+                    if !isPlaying {
                         NSApplication.shared.hide(nil)
                     }
                 }
