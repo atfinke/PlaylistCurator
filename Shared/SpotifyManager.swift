@@ -120,7 +120,7 @@ class SpotifyManager: NSObject, ObservableObject {
         startWatchSession()
         #endif
         
-        Timer.scheduledTimer(withTimeInterval: 45.0,
+        Timer.scheduledTimer(withTimeInterval: 10.0,
                              repeats: true) { _ in
                                 self.updateNowPlaying()
         }
@@ -238,8 +238,16 @@ class SpotifyManager: NSObject, ObservableObject {
         isPreventingDoubleClick = true
         
         postSkipTrack(completion: { success in
-            DispatchQueue.main.async {
-                self.userActionCompleted(successfully: success)
+            if success {
+                self.putSeekTrack { success in
+                    DispatchQueue.main.async {
+                        self.userActionCompleted(successfully: success)
+                    }
+                }
+            } else {
+                DispatchQueue.main.async {
+                    self.userActionCompleted(successfully: success)
+                }
             }
         })
     }
@@ -251,7 +259,11 @@ class SpotifyManager: NSObject, ObservableObject {
         deleteTrackFromPlaylist(completion: { success in
             DispatchQueue.main.async {
                 if success {
-                    self.postSkipTrack()
+                    self.postSkipTrack(completion: { success in
+                        if success {
+                            self.putSeekTrack()
+                        }
+                    })
                 }
                 self.userActionCompleted(successfully: success)
             }
@@ -353,17 +365,6 @@ class SpotifyManager: NSObject, ObservableObject {
                                self.nowPlayingTrackImage,
                                contextURI)
                     return
-                } else {
-                    let duration = durationMS / 1000
-                    Timer.scheduledTimer(withTimeInterval: duration - 10, repeats: false) { _ in
-                        self.updateNowPlaying()
-                    }
-                    Timer.scheduledTimer(withTimeInterval: duration + 10, repeats: false) { _ in
-                        self.updateNowPlaying()
-                    }
-                    Timer.scheduledTimer(withTimeInterval: 30, repeats: false) { _ in
-                        self.updateNowPlaying()
-                    }
                 }
                 
                 self.fetchImage(for: imageURL) { trackImage in
@@ -475,14 +476,34 @@ class SpotifyManager: NSObject, ObservableObject {
         }
     }
     
+    private func putSeekTrack(completion: ((Bool) -> Void)? = nil) {
+        apiURLRequest(for: "/v1/me/player/seek", queryItems: [
+            .init(name: "position_ms", value: "30000")
+        ]) { request in
+            guard var request = request else { return }
+            request.httpMethod = "PUT"
+            let task = URLSession.shared.dataTask(with: request) { _, response, _ in
+                if let httpResponse = response as? HTTPURLResponse,
+                    httpResponse.statusCode == 204 {
+                    completion?(true)
+                } else {
+                    completion?(false)
+                }
+            }
+            task.resume()
+        }
+    }
+    
     // MARK: - Helpers
     
     private func apiURLRequest(for path: String,
+                               queryItems: [URLQueryItem] = [],
                                completion: @escaping ((URLRequest?) -> Void)) {
         var components = URLComponents()
         components.scheme = "https"
         components.host = "api.spotify.com"
         components.path = path
+        components.queryItems = queryItems
         
         guard let url = components.url else { fatalError() }
         var request = URLRequest(url: url)
