@@ -6,7 +6,6 @@
 //  Copyright © 2018 Andrew Finke. All rights reserved.
 //
 
-
 import Combine
 import SwiftUI
 
@@ -20,86 +19,41 @@ import WatchConnectivity
 import Cocoa
 #endif
 
-class SpotifyManager: NSObject, ObservableObject {
-    
+@MainActor
+@Observable
+class SpotifyManager: NSObject {
+
+    // MARK: - Types
+
+    enum ManagerError: Error {
+        case notAuthenticated
+        case invalidResponse
+        case invalidNowPlayingImageResponse
+        case badRequest
+    }
+
+    struct NowPlayingState {
+        let trackName: String
+        let trackURI: String
+        let trackImage: Image?
+        let playlistURI: String?
+    }
+
     // MARK: - Auth Properties -
-    
-    static let defaults: UserDefaults = {
-        guard let defaults = UserDefaults(suiteName: "group.com.andrewfinke.test") else {
-            fatalError()
-        }
-        return defaults
-    }()
-    
-    private var authorizationCode: String? {
-        get {
-            return SpotifyManager.defaults.string(forKey: #function)
-        }
-        set {
-            set(newValue as Any, forKey: #function)
-        }
-    }
-    
-    private var accessToken: String? {
-        get {
-            return SpotifyManager.defaults.string(forKey: #function)
-        }
-        set {
-            set(newValue as Any, forKey: #function)
-        }
-    }
-    
-    private var accessTokenExpiration: Date? {
-        get {
-            return SpotifyManager.defaults.object(forKey: #function) as? Date
-        }
-        set {
-            set(newValue as Any, forKey: #function)
-        }
-    }
-    
-    private var refreshToken: String? {
-        get {
-            return SpotifyManager.defaults.string(forKey: #function)
-        }
-        set {
-            set(newValue as Any, forKey: #function)
-        }
-    }
-    
-    private func set(_ value: Any, forKey key: String) {
-        SpotifyManager.defaults.set(value, forKey: key)
-        print(#function + ": " + key)
-        #if os(iOS)
-        let contextWorkaround = SpotifyManager.defaults.dictionaryRepresentation()
-        do {
-            try WCSession.default.updateApplicationContext(contextWorkaround)
-        } catch {
-            print(error)
-        }
-        #endif
-    }
-    
-    private var isAccessTokenValid: Bool {
-        if accessToken != nil,
-            let date = accessTokenExpiration,
-            date.timeIntervalSinceNow > 60 {
-            return true
-        } else {
-            return false
-        }
-    }
-    
+
+    let authenticationManager = AuthenticationManager()
+
     private var isPreventingDoubleClick = false {
         didSet {
             if isPreventingDoubleClick {
-                Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { _ in
+                Task {
+                    try? await Task.sleep(for: .seconds(1))
                     self.isPreventingDoubleClick = false
                 }
             }
         }
     }
-    
+
     // MARK: - State Properties -
 
     public var objectWillChange = ObservableObjectPublisher()
@@ -107,430 +61,267 @@ class SpotifyManager: NSObject, ObservableObject {
     public var nowPlayingPlaylistName = "-"
     public var nowPlayingTrackName = "-"
     public var nowPlayingTrackImage: Image?
-    
+
     private var nowPlayingPlaylistURI: String?
     private var nowPlayingTrackURI: String?
-    
+
     // MARK: - Initalization -
-    
+
     override init() {
         super.init()
 
-        #if os(iOS) || os(watchOS)
+#if os(iOS) || os(watchOS)
         startWatchSession()
-        #endif
-        
-        Timer.scheduledTimer(withTimeInterval: 10.0,
-                             repeats: true) { _ in
-                                self.updateNowPlaying()
-        }
-        updateNowPlaying()
-    }
-    
-    // MARK: - Get Authorization Code -
-    
-    private func requestAuthorizationCode () {
-        guard !isAccessTokenValid else {
-            updateNowPlaying()
-            return
-        }
-        
-        var components = URLComponents()
-        components.scheme = "https"
-        components.host = "accounts.spotify.com"
-        components.path = "/authorize"
-        
-        components.queryItems = authQueryItems(appending: [
-            URLQueryItem(name: "response_type", value: "code"),
-            URLQueryItem(name: "scope", value: "user-modify-playback-state user-read-playback-state user-read-currently-playing playlist-modify-public playlist-modify-private"),
-        ])
-        
-        guard let url = components.url else { fatalError() }
-        
-        #if os(iOS)
-        DispatchQueue.main.async {
-            UIApplication.shared.open(url,
-                                      options: [:],
-                                      completionHandler: nil)
-        }
-        #elseif os(watchOS)
-        print("need ios auth")
-        #elseif os(macOS)
-        NSWorkspace.shared.open(url)
-        #endif
-    }
-    
-    func handleOpenURL(_ components: URLComponents) {
-        guard components.queryItems?.count == 1,
-            let item = components.queryItems?.first,
-            item.name == "code",
-            let code = item.value else {
-                // Invalid open url scheme
-                return
-        }
-        authorizationCode = code
-        requestAccessToken()
-    }
-    
-    private func requestAccessToken(completion: ((String?) -> Void)? = nil) {
-        if isAccessTokenValid, let token = accessToken {
-            completion?(token)
-            return
-        }
-        
-        let additionalQueryItems: [URLQueryItem]
-        if let token = refreshToken {
-            additionalQueryItems = [
-                URLQueryItem(name: "grant_type", value: "refresh_token"),
-                URLQueryItem(name: "refresh_token", value: token)
-            ]
-        } else if let code = authorizationCode {
-            additionalQueryItems = [
-                URLQueryItem(name: "grant_type", value: "authorization_code"),
-                URLQueryItem(name: "code", value: code)
-            ]
-        } else {
-            requestAuthorizationCode()
-            completion?(nil)
-            return
-        }
-        
-        var components = URLComponents()
-        components.scheme = "https"
-        components.host = "accounts.spotify.com"
-        components.path = "/api/token"
-        
-        components.queryItems = authQueryItems(appending: additionalQueryItems)
-        
-        guard let url = components.url else { fatalError() }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.addValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
-        let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
-            if let error = error {
-                print(response as Any)
-                print(error)
-                // Failed to fetch access token
-                completion?(nil)
-            } else if let data = data {
-                let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
-                guard let accessToken = json?["access_token"] as? String,
-                    let expiresIn = json?["expires_in"] as? Int else {
-                        // Invalid access token json
-                        return
+#endif
+
+        Task {
+            repeat {
+                do {
+                    _ = try await updateNowPlaying()
+                    try await Task.sleep(for: .seconds(10))
+                } catch {
+                    print("#function: " + error.localizedDescription)
                 }
-                
-                self.accessToken = accessToken
-                self.accessTokenExpiration = Date(timeIntervalSinceNow: TimeInterval(expiresIn))
-                self.refreshToken = (json?["refresh_token"] as? String) ?? self.refreshToken
-                
-                completion?(accessToken)
-            }
+                try? await Task.sleep(for: .seconds(1))
+            } while(!Task.isCancelled)
         }
-        task.resume()
-    }
-    
-    // MARK: - User Actions -
-    
-    func keepTrack() {
-        guard !isPreventingDoubleClick else { return }
-        isPreventingDoubleClick = true
-        
-        postSkipTrack(completion: { success in
-            if success {
-                self.putSeekTrack { success in
-                    DispatchQueue.main.async {
-                        self.userActionCompleted(successfully: success)
-                    }
-                }
-            } else {
-                DispatchQueue.main.async {
-                    self.userActionCompleted(successfully: success)
-                }
-            }
-        })
-    }
-    
-    func removeTrack() {
-        guard !isPreventingDoubleClick else { return }
-        isPreventingDoubleClick = true
-        
-        deleteTrackFromPlaylist(completion: { success in
-            DispatchQueue.main.async {
-                if success {
-                    self.postSkipTrack(completion: { success in
-                        if success {
-                            self.putSeekTrack()
-                        }
-                    })
-                }
-                self.userActionCompleted(successfully: success)
-            }
-        })
     }
 
-    func reloadNowPlaying() {
-        updateNowPlaying { success in
+    // MARK: - User Actions -
+
+    func keepTrack() async {
+        guard !isPreventingDoubleClick else { return }
+        isPreventingDoubleClick = true
+
+        do {
+            var success = false
+            if try await postSkipTrack() {
+                if try await putSeekTrack() {
+                    success = true
+                }
+            }
             self.userActionCompleted(successfully: success)
+        } catch {
+            print("#function: " + error.localizedDescription)
+            self.userActionCompleted(successfully: false)
         }
     }
-    
-    private func userActionCompleted(successfully success: Bool) {
-        #if os(iOS)
-        if success {
-            UINotificationFeedbackGenerator().notificationOccurred(.success)
-        } else {
-            UINotificationFeedbackGenerator().notificationOccurred(.error)
+
+    func removeTrack() async {
+        guard !isPreventingDoubleClick else { return }
+        isPreventingDoubleClick = true
+
+        do {
+            let success = try await deleteTrackFromPlaylist()
+            if success {
+                if try await postSkipTrack() {
+                    _ = try? await self.putSeekTrack()
+                }
+            }
+            self.userActionCompleted(successfully: success)
+        } catch {
+            print("#function: " + error.localizedDescription)
+            self.userActionCompleted(successfully: false)
         }
-        #elseif os(watchOS)
-        if success {
-            WKInterfaceDevice.current().play(.success)
-        } else {
-            WKInterfaceDevice.current().play(.failure)
-        }
-        #endif
     }
-    
+
+    nonisolated func reloadNowPlaying() async {
+        do {
+            let success = try await updateNowPlaying()
+            self.userActionCompleted(successfully: success)
+        } catch {
+            print("#function: " + error.localizedDescription)
+            self.userActionCompleted(successfully: false)
+        }
+    }
+
+    nonisolated private func userActionCompleted(successfully success: Bool) {
+        Task { @MainActor in
+#if os(iOS)
+            if success {
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
+            } else {
+                UINotificationFeedbackGenerator().notificationOccurred(.error)
+            }
+#elseif os(watchOS)
+            if success {
+                WKInterfaceDevice.current().play(.success)
+            } else {
+                WKInterfaceDevice.current().play(.failure)
+            }
+#endif
+        }
+    }
+
     // MARK: - Spotify API -
-    
-    private func updateNowPlaying(delay: Double = 0.0, completion: ((Bool) -> Void)? = nil) {
+
+    @discardableResult
+    private func updateNowPlaying(delay: Double = 0.0) async throws -> Bool {
         func set(playlist: String, track: String) {
             nowPlayingTrackName = track
             nowPlayingPlaylistName = playlist
-            DispatchQueue.main.async {
-                self.objectWillChange.send()
-            }
         }
-        DispatchQueue.global().asyncAfter(deadline: DispatchTime.now() + delay) {
-            self.getNowPlayingState { trackName, trackURI, trackImage, playlistURI  in
-                guard let playlistURI = playlistURI else {
-                    set(playlist: "-", track: "-")
-                    completion?(false)
-                    return
-                }
-                self.getPlaylistName(for: playlistURI) { playlistName in
-                    guard let trackName = trackName,
-                        let trackURI = trackURI,
-                        let playlistName = playlistName else {
-                            set(playlist: "-", track: "-")
-                            completion?(false)
-                            return
-                    }
-                    self.nowPlayingTrackURI = trackURI
-                    self.nowPlayingPlaylistURI = playlistURI
-                    self.nowPlayingTrackImage = trackImage
-                    set(playlist: playlistName, track: trackName)
-                    completion?(true)
-                }
-            }
-        }
-    }
-    
-    func getNowPlayingState(completion: @escaping ((_ trackName: String?, _ trackURI: String?, _ trackImage: Image?, _ playlistURI: String?) -> Void)) {
-        apiURLRequest(for: "/v1/me/player/currently-playing/") { request in
-            guard var request = request else { return }
-            request.httpMethod = "GET"
-            
-            let task = URLSession.shared.dataTask(with: request) { data, response, error in
-                guard let data = data, let json = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String: Any],
-                    let item = json["item"] as? [String: Any],
-                    let isPlaying = json["is_playing"] as? Bool,
-                    let trackName = item["name"] as? String,
-                    let trackURI = item["uri"] as? String,
-                    let context = json["context"] as? [String: Any],
-                    let contextType = context["type"] as? String,
-                    let contextURI = context["uri"] as? String,
-                    let album = item["album"] as? [String: Any],
-                    let images = album["images"] as? [[String: Any]],
-                    let imageURLString = images.first?["url"] as? String,
-                    let imageURL = URL(string: imageURLString),
-                    let durationMS = item["duration_ms"] as? Double,
-                    contextType == "playlist" else {
-                        completion(nil, nil, nil, nil)
-                        return
-                }
-                
-                #if os(macOS)
-                DispatchQueue.main.async {
-                    if !isPlaying {
-                        NSApplication.shared.hide(nil)
-                    }
-                }
-                #endif
 
-                if trackURI == self.nowPlayingTrackURI {
-                    completion(trackName,
-                               trackURI,
-                               self.nowPlayingTrackImage,
-                               contextURI)
-                    return
-                }
-                
-                self.fetchImage(for: imageURL) { trackImage in
-                    completion(trackName,
-                               trackURI,
-                               trackImage,
-                               contextURI)
-                }
-            }
-            task.resume()
+        try await Task.sleep(for: .seconds(delay))
+
+        let nowPlayingState = try await getNowPlayingState()
+        guard let playlistURI = nowPlayingState.playlistURI else {
+            set(playlist: "-", track: "-")
+            return false
         }
+
+        let playlistName = try await getPlaylistName(for: playlistURI)
+
+        self.nowPlayingTrackURI = nowPlayingState.trackURI
+        self.nowPlayingPlaylistURI = playlistURI
+        self.nowPlayingTrackImage = nowPlayingState.trackImage
+        set(playlist: playlistName, track: nowPlayingState.trackName)
+        return true
     }
-    
-    func fetchImage(for url: URL, completion: @escaping ((Image?) -> Void)) {
-        let task = URLSession.shared.dataTask(with: url) { data, _, _ in
-            
-            #if os(macOS)
-            guard let data = data, let nativeImage = NSImage(data: data) else {
-                completion(nil)
-                return
-            }
-            let image = Image(nsImage: nativeImage)
-            #else
-            guard let data = data, let nativeImage = UIImage(data: data) else {
-                completion(nil)
-                return
-            }
-            let image = Image(uiImage: nativeImage)
-            #endif
-            
-            completion(image)
+
+    nonisolated func getNowPlayingState() async throws -> NowPlayingState {
+        var request = try await authenticationManager.apiURLRequest(for: "/v1/me/player/currently-playing/")
+        request.httpMethod = "GET"
+
+        let (data, _) = try await URLSession.shared.data(for: request)
+        guard let json = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String: Any],
+              let item = json["item"] as? [String: Any],
+              let isPlaying = json["is_playing"] as? Bool,
+              let trackName = item["name"] as? String,
+              let trackURI = item["uri"] as? String,
+              let context = json["context"] as? [String: Any],
+              let contextType = context["type"] as? String,
+              let contextURI = context["uri"] as? String,
+              let album = item["album"] as? [String: Any],
+              let images = album["images"] as? [[String: Any]],
+              let imageURLString = images.first?["url"] as? String,
+              let imageURL = URL(string: imageURLString),
+              contextType == "playlist" else {
+            throw ManagerError.invalidResponse
         }
-        task.resume()
+
+#if os(macOS)
+        if !isPlaying {
+            await NSApplication.shared.hide(nil)
+        }
+#endif
+
+        let nowPlayingTrackURI = await self.nowPlayingTrackURI
+        if trackURI == nowPlayingTrackURI {
+            return await .init(trackName: trackName,
+                               trackURI: trackURI,
+                               trackImage: self.nowPlayingTrackImage,
+                               playlistURI: contextURI)
+        }
+
+#if os(watchOS)
+        return .init(trackName: trackName,
+                     trackURI: trackURI,
+                     trackImage: nil,
+                     playlistURI: contextURI)
+#else
+
+        var trackImage: Image?
+        do {
+            trackImage = try await fetchImage(for: imageURL)
+
+        } catch {
+            print(error)
+        }
+        return .init(trackName: trackName,
+                     trackURI: trackURI,
+                     trackImage: trackImage,
+                     playlistURI: contextURI)
+#endif
     }
-    
-    func getPlaylistName(for uri: String, completion: @escaping ((_ playlistName: String?) -> Void)) {
+
+    nonisolated func fetchImage(for url: URL) async throws -> Image {
+        let (data, _) = try await URLSession.shared.data(from: url)
+
+#if os(macOS)
+        guard let nativeImage = NSImage(data: data) else {
+            throw ManagerError.invalidNowPlayingImageResponse
+        }
+        let image = Image(nsImage: nativeImage)
+#else
+        guard let nativeImage = UIImage(data: data) else {
+            throw ManagerError.invalidNowPlayingImageResponse
+        }
+        let image = Image(uiImage: nativeImage)
+#endif
+        return image
+    }
+
+    nonisolated func getPlaylistName(for uri: String) async throws -> String {
         guard let playlistID = uri.components(separatedBy: ":").last else {
-            completion(nil)
-            return
+            throw ManagerError.badRequest
         }
-        apiURLRequest(for: "/v1/playlists/" + playlistID) { request in
-            guard var request = request else { return }
-            request.httpMethod = "GET"
-            
-            let task = URLSession.shared.dataTask(with: request) { data, _, _ in
-                guard let data = data,
-                    let json = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String: Any],
-                    let playlistName = json["name"] as? String else {
-                        completion(nil)
-                        return
-                }
-                completion(playlistName)
-            }
-            task.resume()
+
+        var request = try await authenticationManager.apiURLRequest(for: "/v1/playlists/" + playlistID)
+        request.httpMethod = "GET"
+        let (data, _) = try await URLSession.shared.data(for: request)
+
+        guard let json = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String: Any],
+              let playlistName = json["name"] as? String else {
+            throw ManagerError.invalidResponse
+        }
+        return playlistName
+    }
+
+    nonisolated private func deleteTrackFromPlaylist() async throws -> Bool {
+        guard let playlistID = await nowPlayingPlaylistURI?.components(separatedBy: ":").last,
+              let trackURI = await nowPlayingTrackURI else {
+            throw ManagerError.badRequest
+        }
+
+        let state = try await getNowPlayingState()
+        guard trackURI == state.trackURI else {
+            throw ManagerError.badRequest
+        }
+
+        var request = try await authenticationManager.apiURLRequest(for: "/v1/playlists/\(playlistID)/tracks")
+        request.httpMethod = "DELETE"
+        let param = ["tracks": [["uri": trackURI]]]
+        request.httpBody = try? JSONSerialization.data(withJSONObject: param)
+        let (_, response) = try await URLSession.shared.data(for: request)
+
+        if let httpResponse = response as? HTTPURLResponse,
+           httpResponse.statusCode == 200 {
+            return true
+        } else {
+            return false
         }
     }
-    
-    private func deleteTrackFromPlaylist(completion: @escaping ((Bool) -> Void)) {
-        guard let playlistID = nowPlayingPlaylistURI?.components(separatedBy: ":").last,
-            let trackURI = nowPlayingTrackURI else {
-                completion(false)
-                return
-        }
 
-        getNowPlayingState { _, currentTrackURI, _, _ in
-            // make sure we can only delete current track
-            guard trackURI == currentTrackURI else {
-                completion(false)
-                return
+    nonisolated private func postSkipTrack() async throws -> Bool {
+        var request = try await authenticationManager.apiURLRequest(for: "/v1/me/player/next")
+        request.httpMethod = "POST"
+        let (_, response) = try await URLSession.shared.data(for: request)
+
+        if let httpResponse = response as? HTTPURLResponse,
+           httpResponse.statusCode == 204 {
+            Task {
+                try await self.updateNowPlaying(delay: 0.5)
             }
-
-            self.apiURLRequest(for: "/v1/playlists/\(playlistID)/tracks") { request in
-                guard var request = request else { return }
-                request.httpMethod = "DELETE"
-
-                let param = ["tracks" : [["uri": trackURI]]]
-                request.httpBody = try? JSONSerialization.data(withJSONObject: param)
-
-                let task = URLSession.shared.dataTask(with: request) { data, response, _ in
-                    if let httpResponse = response as? HTTPURLResponse,
-                        httpResponse.statusCode == 200 {
-                        completion(true)
-                    } else {
-                        completion(false)
-                    }
-                }
-                task.resume()
-            }
-        }
-        
-
-    }
-    
-    private func postSkipTrack(completion: ((Bool) -> Void)? = nil) {
-        apiURLRequest(for: "/v1/me/player/next") { request in
-            guard var request = request else { return }
-            request.httpMethod = "POST"
-            
-            let task = URLSession.shared.dataTask(with: request) { _, response, _ in
-                if let httpResponse = response as? HTTPURLResponse,
-                    httpResponse.statusCode == 204 {
-                    self.updateNowPlaying(delay: 0.5)
-                    completion?(true)
-                } else {
-                    completion?(false)
-                }
-            }
-            task.resume()
+            return true
+        } else {
+            return false
         }
     }
-    
-    private func putSeekTrack(completion: ((Bool) -> Void)? = nil) {
-        apiURLRequest(for: "/v1/me/player/seek", queryItems: [
+
+    nonisolated private func putSeekTrack() async throws -> Bool {
+        var request = try await authenticationManager.apiURLRequest(for: "/v1/me/player/seek", queryItems: [
             .init(name: "position_ms", value: "30000")
-        ]) { request in
-            guard var request = request else { return }
-            request.httpMethod = "PUT"
-            let task = URLSession.shared.dataTask(with: request) { _, response, _ in
-                if let httpResponse = response as? HTTPURLResponse,
-                    httpResponse.statusCode == 204 {
-                    completion?(true)
-                } else {
-                    completion?(false)
-                }
-            }
-            task.resume()
+        ])
+        request.httpMethod = "PUT"
+        let (_, response) = try await URLSession.shared.data(for: request)
+        if let httpResponse = response as? HTTPURLResponse,
+           httpResponse.statusCode == 204 {
+            return true
+        } else {
+            return false
         }
     }
-    
-    // MARK: - Helpers
-    
-    private func apiURLRequest(for path: String,
-                               queryItems: [URLQueryItem] = [],
-                               completion: @escaping ((URLRequest?) -> Void)) {
-        var components = URLComponents()
-        components.scheme = "https"
-        components.host = "api.spotify.com"
-        components.path = path
-        components.queryItems = queryItems
-        
-        guard let url = components.url else { fatalError() }
-        var request = URLRequest(url: url)
-        requestAccessToken { token in
-            guard let token = token else {
-                completion(nil)
-                return
-            }
-            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-            completion(request)
-        }
-    }
-    
-    private func authQueryItems(appending items: [URLQueryItem] = []) -> [URLQueryItem] {
-        var queryItems = [
-            URLQueryItem(name: "redirect_uri",
-                         value: Configuration.shared.redirectURI),
-            URLQueryItem(name: "client_id",
-                         value: Configuration.shared.clientID),
-            URLQueryItem(name: "client_secret",
-                         value: Configuration.shared.clientSecret)
-        ]
-        queryItems.append(contentsOf: items)
-        return queryItems
-    }
-    
-    
 }
 
 #if os(iOS) || os(watchOS)
@@ -541,32 +332,25 @@ extension SpotifyManager: WCSessionDelegate {
         session.delegate = self
         session.activate()
     }
-    
+
     // MARK: - WCSessionDelegate -
-    
-    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
-        set("_", forKey: "force_update")
-    }
-    
-    #if os(iOS)
-    func sessionDidBecomeInactive(_ session: WCSession) {}
-    func sessionDidDeactivate(_ session: WCSession) {}
-    #elseif os(watchOS)
-    func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String : Any]) {
-        print(#function)
-        for (key, value) in applicationContext {
-            if key == "authorizationCode" {
-                authorizationCode = value as? String
-            } else if key == "accessToken" {
-                accessToken = value as? String
-            } else if key == "refreshToken" {
-                refreshToken = value as? String
-            } else if key == "accessTokenExpiration" {
-                accessTokenExpiration = value as? Date
-            }
+
+    nonisolated func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
+        Task.detached {
+            await self.authenticationManager.set("_", forKey: "force_update")
         }
     }
-    #endif
-    
+
+#if os(iOS)
+    nonisolated func sessionDidBecomeInactive(_ session: WCSession) {}
+    nonisolated func sessionDidDeactivate(_ session: WCSession) {}
+#elseif os(watchOS)
+    nonisolated func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
+        Task.detached {
+            await self.authenticationManager.didReceive(applicationContext: applicationContext)
+        }
+    }
+#endif
+
 }
 #endif

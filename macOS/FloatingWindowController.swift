@@ -31,7 +31,17 @@ class FloatingWindowController: NSWindowController {
 
         let hostingView = NSHostingView(rootView: ContentView(manager: SpotifyManager()))
         hostingView.translatesAutoresizingMaskIntoConstraints = false
-        window.contentView?.addSubview(hostingView)
+
+        let visualEffectView = NSVisualEffectView()
+        visualEffectView.translatesAutoresizingMaskIntoConstraints = false
+        visualEffectView.material = .hudWindow
+        visualEffectView.blendingMode = .behindWindow
+        visualEffectView.addSubview(hostingView)
+        visualEffectView.wantsLayer = true
+        visualEffectView.state = .active
+        visualEffectView.layer?.cornerRadius = 10.0
+
+        window.contentView?.addSubview(visualEffectView)
 
         let constraints = [
             hostingView.leadingAnchor
@@ -42,6 +52,14 @@ class FloatingWindowController: NSWindowController {
                 .constraint(equalTo: contentView.topAnchor),
             hostingView.bottomAnchor
                 .constraint(equalTo: contentView.bottomAnchor),
+            hostingView.leadingAnchor
+                .constraint(equalTo: visualEffectView.leadingAnchor),
+            hostingView.trailingAnchor
+                .constraint(equalTo: visualEffectView.trailingAnchor),
+            hostingView.topAnchor
+                .constraint(equalTo: visualEffectView.topAnchor),
+            hostingView.bottomAnchor
+                .constraint(equalTo: visualEffectView.bottomAnchor),
             contentView.heightAnchor.constraint(equalToConstant: 94),
             contentView.widthAnchor.constraint(equalToConstant: 120)
         ]
@@ -59,10 +77,12 @@ class FloatingWindowController: NSWindowController {
 
     @objc func handleEvent(_ event: NSAppleEventDescriptor) {
         guard let descriptor = event.paramDescriptor(forKeyword: AEKeyword(keyDirectObject)),
-            let stringValue = descriptor.stringValue,
-            let components = URLComponents(string: stringValue) else {
-                return
+              let stringValue = descriptor.stringValue,
+              let components = URLComponents(string: stringValue) else {
+            return
         }
-        manager.handleOpenURL(components)
+        Task.detached {
+            await self.manager.authenticationManager.handleOpenURL(components)
+        }
     }
 }

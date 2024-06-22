@@ -8,11 +8,9 @@
 
 import Foundation
 
-class Configuration {
+struct Configuration {
 
     // MARK: - Properties -
-
-    static let shared = Configuration()
 
     let clientID: String
     let clientSecret: String
@@ -20,7 +18,7 @@ class Configuration {
 
     // MARL: - Initialization -
 
-    private init() {
+    init() {
         guard let url = Bundle.main.url(forResource: "Configuration", withExtension: "plist"),
             let configuration = NSDictionary(contentsOf: url) as? [String: String],
             let clientID = configuration["Client ID"],

@@ -8,7 +8,7 @@
 
 import SwiftUI
 
-struct AlbumView : View {
+struct AlbumView: View {
     var image: Image
 
     var body: some View {
@@ -22,47 +22,54 @@ struct ButtonLabelView: View {
     var body: some View {
         ZStack {
             Circle()
-                        .foregroundColor(color)
-                        .frame(width: 16)
+                .foregroundColor(color)
+                .frame(width: 16)
         }
-
     }
 }
 
 struct ContentView: View {
 
-    @ObservedObject var manager: SpotifyManager
+    var manager: SpotifyManager
 
     var body: some View {
         VStack {
             HStack {
                 VStack {
                     Button(action: {
-                        self.manager.keepTrack()
+                        Task(priority: .userInitiated) {
+                            await self.manager.keepTrack()
+                        }
                     }, label: {
                         ButtonLabelView(color: Color(.sRGB,
                                                      red: 100.0 / 255.0,
                                                      green: 210.0 / 255.0,
                                                      blue: 110.0 / 255.0))
-                    }).buttonStyle(PlainButtonStyle())
+                    })
+                    .buttonStyle(PlainButtonStyle())
                     Spacer()
                     Button(action: {
-                        self.manager.removeTrack()
+                        Task(priority: .userInitiated) {
+                            await self.manager.removeTrack()
+                        }
                     }, label: {
                         ButtonLabelView(color: Color.red)
-                    }).buttonStyle(PlainButtonStyle())
+                    })
+                    .buttonStyle(PlainButtonStyle())
                 }.frame(height: 40)
                     .padding(.trailing, 2)
 
                 manager.nowPlayingTrackImage.map { image in
                     Button(action: {
-                        self.manager.reloadNowPlaying()
+                        Task(priority: .userInitiated) {
+                            await self.manager.reloadNowPlaying()
+                        }
                     }, label: {
                         AlbumView(image: image)
                     }).buttonStyle(PlainButtonStyle())
 
                 }
             }
-        }.padding()
+        }
     }
 }

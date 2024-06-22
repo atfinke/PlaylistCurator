@@ -3,13 +3,14 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		141914482BC2122300EBE19D /* AuthenticationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 141914472BC2122300EBE19D /* AuthenticationManager.swift */; };
+		141914492BC2122300EBE19D /* AuthenticationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 141914472BC2122300EBE19D /* AuthenticationManager.swift */; };
+		1419144A2BC2122300EBE19D /* AuthenticationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 141914472BC2122300EBE19D /* AuthenticationManager.swift */; };
 		145E1E0223134D8D004F604B /* FloatingWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1487692F23134D1300EE23E2 /* FloatingWindowController.swift */; };
-		146158C722E425B100F17877 /* ButtonContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 146158C622E425B100F17877 /* ButtonContentView.swift */; };
-		146158C922E425B600F17877 /* PCViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 146158C822E425B600F17877 /* PCViewController.swift */; };
 		146158CB22E425BE00F17877 /* ButtonContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 146158CA22E425BE00F17877 /* ButtonContentView.swift */; };
 		14A7982E22E3D6A30096CC90 /* SpotifyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14EDE23422E3A1BC009ADC16 /* SpotifyManager.swift */; };
 		14A7982F22E3D6A70096CC90 /* Configuration.plist in Resources */ = {isa = PBXBuildFile; fileRef = 14EDE23322E3A1BC009ADC16 /* Configuration.plist */; };
@@ -28,7 +29,6 @@
 		14EDE20722E39CD9009ADC16 /* PlaylistCurator WatchKit App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 14EDE20622E39CD9009ADC16 /* PlaylistCurator WatchKit App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		14EDE20D22E39CD9009ADC16 /* Interface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 14EDE20B22E39CD9009ADC16 /* Interface.storyboard */; };
 		14EDE20F22E39CD9009ADC16 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 14EDE20E22E39CD9009ADC16 /* Assets.xcassets */; };
-		14EDE21622E39CDA009ADC16 /* PlaylistCurator WatchKit Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 14EDE21522E39CDA009ADC16 /* PlaylistCurator WatchKit Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		14EDE21B22E39CDA009ADC16 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14EDE21A22E39CDA009ADC16 /* ContentView.swift */; };
 		14EDE21D22E39CDA009ADC16 /* HostingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14EDE21C22E39CDA009ADC16 /* HostingController.swift */; };
 		14EDE21F22E39CDA009ADC16 /* ExtensionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14EDE21E22E39CDA009ADC16 /* ExtensionDelegate.swift */; };
@@ -46,27 +46,9 @@
 			remoteGlobalIDString = 14EDE20522E39CD9009ADC16;
 			remoteInfo = "PlaylistCurator WatchKit App";
 		};
-		14EDE21722E39CDA009ADC16 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 14EDE1EC22E39CD8009ADC16 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 14EDE21422E39CDA009ADC16;
-			remoteInfo = "PlaylistCurator WatchKit Extension";
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		14EDE22B22E39CDA009ADC16 /* Embed App Extensions */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 13;
-			files = (
-				14EDE21622E39CDA009ADC16 /* PlaylistCurator WatchKit Extension.appex in Embed App Extensions */,
-			);
-			name = "Embed App Extensions";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		14EDE22F22E39CDA009ADC16 /* Embed Watch Content */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -81,8 +63,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		146158C622E425B100F17877 /* ButtonContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ButtonContentView.swift; sourceTree = "<group>"; };
-		146158C822E425B600F17877 /* PCViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PCViewController.swift; sourceTree = "<group>"; };
+		141914472BC2122300EBE19D /* AuthenticationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationManager.swift; sourceTree = "<group>"; };
 		146158CA22E425BE00F17877 /* ButtonContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ButtonContentView.swift; sourceTree = "<group>"; };
 		1487692F23134D1300EE23E2 /* FloatingWindowController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FloatingWindowController.swift; sourceTree = "<group>"; };
 		14BF571D22E6A731002DE95A /* PlaylistCurator macOS App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "PlaylistCurator macOS App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -102,7 +83,6 @@
 		14EDE20C22E39CD9009ADC16 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Interface.storyboard; sourceTree = "<group>"; };
 		14EDE20E22E39CD9009ADC16 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		14EDE21022E39CD9009ADC16 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		14EDE21522E39CDA009ADC16 /* PlaylistCurator WatchKit Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "PlaylistCurator WatchKit Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		14EDE21A22E39CDA009ADC16 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		14EDE21C22E39CDA009ADC16 /* HostingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostingController.swift; sourceTree = "<group>"; };
 		14EDE21E22E39CDA009ADC16 /* ExtensionDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtensionDelegate.swift; sourceTree = "<group>"; };
@@ -158,6 +138,7 @@
 				14EDE23322E3A1BC009ADC16 /* Configuration.plist */,
 				14EDE23522E3A1BC009ADC16 /* Configuration.swift */,
 				14EDE23422E3A1BC009ADC16 /* SpotifyManager.swift */,
+				141914472BC2122300EBE19D /* AuthenticationManager.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -179,7 +160,6 @@
 			children = (
 				14EDE1F422E39CD8009ADC16 /* PlaylistCurator.app */,
 				14EDE20622E39CD9009ADC16 /* PlaylistCurator WatchKit App.app */,
-				14EDE21522E39CDA009ADC16 /* PlaylistCurator WatchKit Extension.appex */,
 				14BF571D22E6A731002DE95A /* PlaylistCurator macOS App.app */,
 			);
 			name = Products;
@@ -189,8 +169,6 @@
 			isa = PBXGroup;
 			children = (
 				14EDE1F722E39CD8009ADC16 /* AppDelegate.swift */,
-				146158C822E425B600F17877 /* PCViewController.swift */,
-				146158C622E425B100F17877 /* ButtonContentView.swift */,
 				14EDE1F922E39CD8009ADC16 /* ContentView.swift */,
 				14EDE1FB22E39CD9009ADC16 /* Assets.xcassets */,
 				14EDE20022E39CD9009ADC16 /* LaunchScreen.storyboard */,
@@ -266,34 +244,17 @@
 			buildConfigurationList = 14EDE22C22E39CDA009ADC16 /* Build configuration list for PBXNativeTarget "PlaylistCurator WatchKit App" */;
 			buildPhases = (
 				14EDE20422E39CD9009ADC16 /* Resources */,
-				14EDE22B22E39CDA009ADC16 /* Embed App Extensions */,
+				14EDE21122E39CDA009ADC16 /* Sources */,
+				14EDE21222E39CDA009ADC16 /* Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				14EDE21822E39CDA009ADC16 /* PBXTargetDependency */,
 			);
 			name = "PlaylistCurator WatchKit App";
 			productName = "PlaylistCurator WatchKit App";
 			productReference = 14EDE20622E39CD9009ADC16 /* PlaylistCurator WatchKit App.app */;
-			productType = "com.apple.product-type.application.watchapp2";
-		};
-		14EDE21422E39CDA009ADC16 /* PlaylistCurator WatchKit Extension */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 14EDE22822E39CDA009ADC16 /* Build configuration list for PBXNativeTarget "PlaylistCurator WatchKit Extension" */;
-			buildPhases = (
-				14EDE21122E39CDA009ADC16 /* Sources */,
-				14EDE21222E39CDA009ADC16 /* Frameworks */,
-				14EDE21322E39CDA009ADC16 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = "PlaylistCurator WatchKit Extension";
-			productName = "PlaylistCurator WatchKit Extension";
-			productReference = 14EDE21522E39CDA009ADC16 /* PlaylistCurator WatchKit Extension.appex */;
-			productType = "com.apple.product-type.watchkit2-extension";
+			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
@@ -301,8 +262,9 @@
 		14EDE1EC22E39CD8009ADC16 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				BuildIndependentTargetsInParallel = YES;
 				LastSwiftUpdateCheck = 1100;
-				LastUpgradeCheck = 1150;
+				LastUpgradeCheck = 1530;
 				ORGANIZATIONNAME = "Andrew Finke";
 				TargetAttributes = {
 					14BF571C22E6A731002DE95A = {
@@ -312,9 +274,6 @@
 						CreatedOnToolsVersion = 11.0;
 					};
 					14EDE20522E39CD9009ADC16 = {
-						CreatedOnToolsVersion = 11.0;
-					};
-					14EDE21422E39CDA009ADC16 = {
 						CreatedOnToolsVersion = 11.0;
 					};
 				};
@@ -334,7 +293,6 @@
 			targets = (
 				14EDE1F322E39CD8009ADC16 /* PlaylistCurator */,
 				14EDE20522E39CD9009ADC16 /* PlaylistCurator WatchKit App */,
-				14EDE21422E39CDA009ADC16 /* PlaylistCurator WatchKit Extension */,
 				14BF571C22E6A731002DE95A /* PlaylistCurator macOS App */,
 			);
 		};
@@ -365,17 +323,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				14EDE20F22E39CD9009ADC16 /* Assets.xcassets in Resources */,
-				14EDE20D22E39CD9009ADC16 /* Interface.storyboard in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		14EDE21322E39CDA009ADC16 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 				14A7982F22E3D6A70096CC90 /* Configuration.plist in Resources */,
+				14EDE20F22E39CD9009ADC16 /* Assets.xcassets in Resources */,
 				14EDE22122E39CDA009ADC16 /* Assets.xcassets in Resources */,
+				14EDE20D22E39CD9009ADC16 /* Interface.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -389,6 +340,7 @@
 				14BF573322E6A754002DE95A /* SpotifyManager.swift in Sources */,
 				14BF573222E6A754002DE95A /* Configuration.swift in Sources */,
 				145E1E0223134D8D004F604B /* FloatingWindowController.swift in Sources */,
+				1419144A2BC2122300EBE19D /* AuthenticationManager.swift in Sources */,
 				14BF572222E6A731002DE95A /* ContentView.swift in Sources */,
 				14BF572022E6A731002DE95A /* AppDelegate.swift in Sources */,
 			);
@@ -401,9 +353,8 @@
 				14EDE23722E3A1BC009ADC16 /* SpotifyManager.swift in Sources */,
 				14EDE1FA22E39CD8009ADC16 /* ContentView.swift in Sources */,
 				14EDE23822E3A1BC009ADC16 /* Configuration.swift in Sources */,
-				146158C722E425B100F17877 /* ButtonContentView.swift in Sources */,
+				141914482BC2122300EBE19D /* AuthenticationManager.swift in Sources */,
 				14EDE1F822E39CD8009ADC16 /* AppDelegate.swift in Sources */,
-				146158C922E425B600F17877 /* PCViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -413,6 +364,7 @@
 			files = (
 				14A7982E22E3D6A30096CC90 /* SpotifyManager.swift in Sources */,
 				14A7983022E3D6A70096CC90 /* Configuration.swift in Sources */,
+				141914492BC2122300EBE19D /* AuthenticationManager.swift in Sources */,
 				146158CB22E425BE00F17877 /* ButtonContentView.swift in Sources */,
 				14EDE21D22E39CDA009ADC16 /* HostingController.swift in Sources */,
 				14EDE21B22E39CDA009ADC16 /* ContentView.swift in Sources */,
@@ -427,11 +379,6 @@
 			isa = PBXTargetDependency;
 			target = 14EDE20522E39CD9009ADC16 /* PlaylistCurator WatchKit App */;
 			targetProxy = 14EDE20822E39CD9009ADC16 /* PBXContainerItemProxy */;
-		};
-		14EDE21822E39CDA009ADC16 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 14EDE21422E39CDA009ADC16 /* PlaylistCurator WatchKit Extension */;
-			targetProxy = 14EDE21722E39CDA009ADC16 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -471,6 +418,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 72S993BNAV;
 				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_PREVIEWS = YES;
@@ -479,7 +427,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MACOSX_DEPLOYMENT_TARGET = 14.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.andrewfinke.PlaylistCurator;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
@@ -495,6 +443,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 72S993BNAV;
 				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_PREVIEWS = YES;
@@ -503,7 +452,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MACOSX_DEPLOYMENT_TARGET = 14.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.andrewfinke.PlaylistCurator;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
@@ -537,6 +486,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -547,6 +497,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -568,6 +519,7 @@
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = complete;
 			};
 			name = Debug;
 		};
@@ -597,6 +549,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -607,6 +560,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -621,53 +575,8 @@
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_STRICT_CONCURRENCY = complete;
 				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
-		};
-		14EDE22922E39CDA009ADC16 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_COMPLICATION_NAME = Complication;
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 72S993BNAV;
-				ENABLE_PREVIEWS = YES;
-				INFOPLIST_FILE = "WatchKit Extension/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.andrewfinke.PlaylistCurator.watchkitapp.watchkitextension;
-				PRODUCT_NAME = "${TARGET_NAME}";
-				SDKROOT = watchos;
-				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 6.0;
-			};
-			name = Debug;
-		};
-		14EDE22A22E39CDA009ADC16 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_COMPLICATION_NAME = Complication;
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 72S993BNAV;
-				ENABLE_PREVIEWS = YES;
-				INFOPLIST_FILE = "WatchKit Extension/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.andrewfinke.PlaylistCurator.watchkitapp.watchkitextension;
-				PRODUCT_NAME = "${TARGET_NAME}";
-				SDKROOT = watchos;
-				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 6.0;
 			};
 			name = Release;
 		};
@@ -676,17 +585,21 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_COMPLICATION_NAME = Complication;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 72S993BNAV;
-				IBSC_MODULE = PlaylistCurator_WatchKit_Extension;
 				INFOPLIST_FILE = "WatchKit App/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.andrewfinke.PlaylistCurator.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 6.0;
+				WATCHOS_DEPLOYMENT_TARGET = 10.4;
 			};
 			name = Debug;
 		};
@@ -695,17 +608,21 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_COMPLICATION_NAME = Complication;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 72S993BNAV;
-				IBSC_MODULE = PlaylistCurator_WatchKit_Extension;
 				INFOPLIST_FILE = "WatchKit App/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.andrewfinke.PlaylistCurator.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 6.0;
+				WATCHOS_DEPLOYMENT_TARGET = 10.4;
 			};
 			name = Release;
 		};
@@ -717,6 +634,7 @@
 				DEVELOPMENT_TEAM = 72S993BNAV;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = iOS/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -736,6 +654,7 @@
 				DEVELOPMENT_TEAM = 72S993BNAV;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = iOS/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -764,15 +683,6 @@
 			buildConfigurations = (
 				14EDE22622E39CDA009ADC16 /* Debug */,
 				14EDE22722E39CDA009ADC16 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		14EDE22822E39CDA009ADC16 /* Build configuration list for PBXNativeTarget "PlaylistCurator WatchKit Extension" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				14EDE22922E39CDA009ADC16 /* Debug */,
-				14EDE22A22E39CDA009ADC16 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

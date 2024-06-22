@@ -9,60 +9,107 @@
 import SwiftUI
 import Combine
 
-struct AlbumView : View {
-    var image: Image
-    
+@MainActor
+struct ContentView: View {
+
+    var manager = SpotifyManager()
+
     var body: some View {
-        image
-            .resizable()
-            .frame(width: 200, height: 200)
+        ZStack {
+            Color.clear
+                .ignoresSafeArea()
+            VStack {
+                ZStack {
+                    manager.nowPlayingTrackImage.map {
+                        $0
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .cornerRadius(16)
+                    }
+                    VStack {
+                        Text(manager.nowPlayingTrackName)
+                            .font(.system(size: 30, weight: .bold))
+                            .multilineTextAlignment(.center)
+                            .foregroundStyle(.primary)
+                        Text(manager.nowPlayingPlaylistName)
+                            .font(.system(size: 22, weight: .semibold))
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding()
+                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
+
+                }
+                .padding()
+                .contextMenu {
+                    Button(action: {
+                        Task(priority: .userInitiated) {
+                            await self.manager.reloadNowPlaying()
+                        }
+                    }, label: {
+                        HStack {
+                            Text("Reload")
+                            Image(systemName: "gobackward")
+                        }
+                    })
+                }
+
+                Spacer()
+
+                Button(action: {
+                    Task(priority: .userInitiated) {
+                        await self.manager.keepTrack()
+                    }
+                }, label: {
+                    ButtonContentView(imageName: "checkmark", color: .green)
+                })
+
+                Button(action: {
+                    Task(priority: .userInitiated) {
+                        await self.manager.removeTrack()
+                    }
+                }, label: {
+                    ButtonContentView(imageName: "trash.circle.fill", color: .red)
+                })
+
+                Spacer()
+
+            }
+
+        }
+        .background {
+            Color.clear
+                .background(.thinMaterial)
+                .background {
+                    if let image = manager.nowPlayingTrackImage {
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .ignoresSafeArea()
+                    }
+                }
+        }
+        .preferredColorScheme(.dark)
+        .animation(.spring(), value: manager.nowPlayingTrackName)
+
     }
 }
 
-struct ContentView: View {
-    
-    @ObservedObject var manager = SpotifyManager()
-    
+struct ButtonContentView: View {
+    let imageName: String
+    let color: Color
     var body: some View {
-        return VStack {
-            HStack {
-                manager.nowPlayingTrackImage.map {
-                    AlbumView(image: $0).contextMenu {
-                        Button(action: {
-                            self.manager.reloadNowPlaying()
-                        }, label: {
-                            HStack {
-                                Text("Reload")
-                                Image(systemName: "gobackward")
-                            }
-                        })
-                    }
-                }
-            }.padding()
-            
-            Text(manager.nowPlayingPlaylistName)
-                .font(.system(size: 26, weight: .bold, design: .rounded))
+        ZStack {
+            color
+                .frame(maxHeight: 130)
+                .cornerRadius(16)
+
+            Image(systemName: imageName)
+                .resizable()
+                .frame(width: 60, height: 60)
                 .foregroundColor(.white)
-            Text(manager.nowPlayingTrackName)
-                .multilineTextAlignment(.center)
-                .font(.system(size: 22, weight: .semibold, design: .rounded))
-                .foregroundColor(.white)
-                .padding()
-            
-            Spacer()
-            
-            Button(action: {
-                self.manager.keepTrack()
-            }, label: {
-                ButtonContentView(imageName:"checkmark", color: .green)
-            }).padding(.bottom, 10)
-            
-            Button(action: {
-                self.manager.removeTrack()
-            }, label: {
-                ButtonContentView(imageName:"trash.circle.fill", color: .red)
-            }).padding(.bottom, 20)
-            
-        }.background(Color.black)
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 4)
+
     }
 }

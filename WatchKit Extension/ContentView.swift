@@ -8,33 +8,30 @@
 
 import SwiftUI
 
+@MainActor
 struct ContentView: View {
 
-    @ObservedObject var manager = SpotifyManager()
+    var manager = SpotifyManager()
 
     var body: some View {
         VStack {
             Button(action: {
-                self.manager.keepTrack()
+                Task(priority: .userInitiated) {
+                    await self.manager.keepTrack()
+                }
             }, label: {
                 ButtonContentView(imageName: "checkmark", color: .green)
             }).background(Color.green).cornerRadius(30)
-            
+
             Button(action: {
-                self.manager.removeTrack()
+                Task(priority: .userInitiated) {
+                    await self.manager.removeTrack()
+                }
             }, label: {
                 ButtonContentView(imageName: "trash.circle.fill", color: .red)
             }).background(Color.red).cornerRadius(30)
-        }.navigationBarTitle(manager.nowPlayingTrackName)
-            .contextMenu {
-                Button(action: {
-                    self.manager.reloadNowPlaying()
-                }, label: {
-                    HStack {
-                        Text("Reload")
-                        Image(systemName: "gobackward")
-                    }
-                })
         }
+        .edgesIgnoringSafeArea(.bottom)
+        .navigationBarTitle(manager.nowPlayingTrackName)
     }
 }

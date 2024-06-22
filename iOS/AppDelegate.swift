@@ -21,27 +21,28 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         let window = UIWindow(frame: UIScreen.main.bounds)
-        window.backgroundColor = .black
-        
-        let controller = PCViewController(rootView: ContentView(manager: manager))
+        let controller = UIHostingController(rootView: ContentView(manager: manager))
         window.rootViewController = controller
         window.makeKeyAndVisible()
 
         self.window = window
 
-        manager.reloadNowPlaying()
+        Task(priority: .userInitiated) {
+            await manager.reloadNowPlaying()
+        }
         return true
     }
 
     // MARK: - Open URL -
 
-    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
             return false
         }
-        manager.handleOpenURL(components)
+        Task.detached {
+            await self.manager.authenticationManager.handleOpenURL(components)
+        }
         return true
     }
 
 }
-
